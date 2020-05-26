@@ -34,6 +34,7 @@ from petstore_api.signing import HttpSigningConfiguration
 
 # import exceptions
 from petstore_api.exceptions import OpenApiException
+from petstore_api.exceptions import ApiAttributeError
 from petstore_api.exceptions import ApiTypeError
 from petstore_api.exceptions import ApiValueError
 from petstore_api.exceptions import ApiKeyError
