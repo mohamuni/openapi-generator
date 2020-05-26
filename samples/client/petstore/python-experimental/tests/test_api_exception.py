@@ -27,13 +27,14 @@ class ApiExceptionTests(unittest.TestCase):
         self.setUpModels()
 
     def setUpModels(self):
-        self.category = petstore_api.Category()
+        from petstore_api.models import category, tag, pet
+        self.category = category.Category()
         self.category.id = id_gen()
         self.category.name = "dog"
-        self.tag = petstore_api.Tag()
+        self.tag = tag.Tag()
         self.tag.id = id_gen()
         self.tag.full_name = "blank"
-        self.pet = petstore_api.Pet(name="hello kity", photo_urls=["http://foo.bar.com/1", "http://foo.bar.com/2"])
+        self.pet = pet.Pet(name="hello kity", photo_urls=["http://foo.bar.com/1", "http://foo.bar.com/2"])
         self.pet.id = id_gen()
         self.pet.status = "sold"
         self.pet.category = self.category
