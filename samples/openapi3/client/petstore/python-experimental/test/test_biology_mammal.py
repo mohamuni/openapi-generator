@@ -15,6 +15,22 @@ from __future__ import absolute_import
 import unittest
 
 import petstore_api
+try:
+    from petstore_api.models import biology_chordate
+except ImportError:
+    biology_chordate = sys.modules[
+        'petstore_api.models.biology_chordate']
+try:
+    from petstore_api.models import biology_hominid
+except ImportError:
+    biology_hominid = sys.modules[
+        'petstore_api.models.biology_hominid']
+try:
+    from petstore_api.models import biology_primate
+except ImportError:
+    biology_primate = sys.modules[
+        'petstore_api.models.biology_primate']
+from petstore_api.models.biology_mammal import BiologyMammal
 
 
 class TestBiologyMammal(unittest.TestCase):
@@ -29,7 +45,7 @@ class TestBiologyMammal(unittest.TestCase):
     def testBiologyMammal(self):
         """Test BiologyMammal"""
         # FIXME: construct object with mandatory attributes with example values
-        # model = petstore_api.BiologyMammal()  # noqa: E501
+        # model = BiologyMammal()  # noqa: E501
         pass
 
 
