@@ -15,6 +15,22 @@ from __future__ import absolute_import
 import unittest
 
 import petstore_api
+try:
+    from petstore_api.models import address
+except ImportError:
+    address = sys.modules[
+        'petstore_api.models.address']
+try:
+    from petstore_api.models import animal
+except ImportError:
+    animal = sys.modules[
+        'petstore_api.models.animal']
+try:
+    from petstore_api.models import cat_all_of
+except ImportError:
+    cat_all_of = sys.modules[
+        'petstore_api.models.cat_all_of']
+from petstore_api.models.cat import Cat
 
 
 class TestCat(unittest.TestCase):
@@ -29,7 +45,7 @@ class TestCat(unittest.TestCase):
     def testCat(self):
         """Test Cat"""
         # FIXME: construct object with mandatory attributes with example values
-        # model = petstore_api.Cat()  # noqa: E501
+        # model = Cat()  # noqa: E501
         pass
 
 

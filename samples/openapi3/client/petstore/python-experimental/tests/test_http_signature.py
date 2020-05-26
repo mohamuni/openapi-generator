@@ -25,6 +25,7 @@ from Crypto.Signature import pkcs1_15, pss, DSS
 from six.moves.urllib.parse import urlencode, urlparse
 
 import petstore_api
+from petstore_api.models import category, tag, pet
 from petstore_api import Configuration, signing
 from petstore_api.rest import (
     RESTClientObject,
@@ -211,13 +212,13 @@ class PetApiTests(unittest.TestCase):
 
     @classmethod
     def setUpModels(cls):
-        cls.category = petstore_api.Category()
+        cls.category = category.Category()
         cls.category.id = id_gen()
         cls.category.name = "dog"
-        cls.tag = petstore_api.Tag()
+        cls.tag = tag.Tag()
         cls.tag.id = id_gen()
         cls.tag.name = "python-pet-tag"
-        cls.pet = petstore_api.Pet(
+        cls.pet = pet.Pet(
             name="hello kity",
             photo_urls=["http://foo.bar.com/1", "http://foo.bar.com/2"]
         )

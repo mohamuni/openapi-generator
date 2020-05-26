@@ -30,7 +30,7 @@ from petstore_api.exceptions import (
     ApiValueError,
     ApiTypeError,
 )
-
+from petstore_api.models import pet
 from .util import id_gen
 
 import urllib3
@@ -80,13 +80,14 @@ class PetApiTests(unittest.TestCase):
         self.setUpFiles()
 
     def setUpModels(self):
-        self.category = petstore_api.Category()
+        from petstore_api.models import category, tag
+        self.category = category.Category()
         self.category.id = id_gen()
         self.category.name = "dog"
-        self.tag = petstore_api.Tag()
+        self.tag = tag.Tag()
         self.tag.id = id_gen()
         self.tag.name = "python-pet-tag"
-        self.pet = petstore_api.Pet(name="hello kity", photo_urls=["http://foo.bar.com/1", "http://foo.bar.com/2"])
+        self.pet = pet.Pet(name="hello kity", photo_urls=["http://foo.bar.com/1", "http://foo.bar.com/2"])
         self.pet.id = id_gen()
         self.pet.status = "sold"
         self.pet.category = self.category
@@ -187,7 +188,7 @@ class PetApiTests(unittest.TestCase):
 
         thread = self.pet_api.get_pet_by_id(self.pet.id, async_req=True)
         result = thread.get()
-        self.assertIsInstance(result, petstore_api.Pet)
+        self.assertIsInstance(result, pet.Pet)
 
     def test_async_with_result(self):
         self.pet_api.add_pet(self.pet, async_req=False)
@@ -208,7 +209,7 @@ class PetApiTests(unittest.TestCase):
                                             _return_http_data_only=False)
         data, status, headers = thread.get()
 
-        self.assertIsInstance(data, petstore_api.Pet)
+        self.assertIsInstance(data, pet.Pet)
         self.assertEqual(status, 200)
 
     def test_async_exception(self):
