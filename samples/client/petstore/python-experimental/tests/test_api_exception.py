@@ -15,7 +15,6 @@ import sys
 import unittest
 
 import petstore_api
-from petstore_api.rest import ApiException
 
 from .util import id_gen
 
@@ -23,7 +22,8 @@ class ApiExceptionTests(unittest.TestCase):
 
     def setUp(self):
         self.api_client = petstore_api.ApiClient()
-        self.pet_api = petstore_api.PetApi(self.api_client)
+        from petstore_api.api.pet_api import PetApi
+        self.pet_api = PetApi(self.api_client)
         self.setUpModels()
 
     def setUpModels(self):
@@ -44,12 +44,12 @@ class ApiExceptionTests(unittest.TestCase):
         self.pet_api.add_pet(self.pet)
         self.pet_api.delete_pet(pet_id=self.pet.id)
 
-        with self.checkRaiseRegex(ApiException, "Pet not found"):
+        with self.checkRaiseRegex(petstore_api.ApiException, "Pet not found"):
             self.pet_api.get_pet_by_id(pet_id=self.pet.id)
 
         try:
             self.pet_api.get_pet_by_id(pet_id=self.pet.id)
-        except ApiException as e:
+        except petstore_api.ApiException as e:
             self.assertEqual(e.status, 404)
             self.assertEqual(e.reason, "Not Found")
             self.checkRegex(e.body, "Pet not found")
@@ -57,7 +57,7 @@ class ApiExceptionTests(unittest.TestCase):
     def test_500_error(self):
         self.pet_api.add_pet(self.pet)
 
-        with self.checkRaiseRegex(ApiException, "Internal Server Error"):
+        with self.checkRaiseRegex(petstore_api.ApiException, "Internal Server Error"):
             self.pet_api.upload_file(
                 pet_id=self.pet.id,
                 additional_metadata="special"
@@ -68,7 +68,7 @@ class ApiExceptionTests(unittest.TestCase):
                 pet_id=self.pet.id,
                 additional_metadata="special"
             )
-        except ApiException as e:
+        except petstore_api.ApiException as e:
             self.assertEqual(e.status, 500)
             self.assertEqual(e.reason, "Internal Server Error")
             self.checkRegex(e.body, "Error 500 Internal Server Error")

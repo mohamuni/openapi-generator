@@ -30,6 +30,7 @@ from petstore_api.exceptions import (
     ApiValueError,
     ApiTypeError,
 )
+from petstore_api.api.pet_api import PetApi
 from petstore_api.models import pet
 from .util import id_gen
 
@@ -75,7 +76,7 @@ class PetApiTests(unittest.TestCase):
         config.host = HOST
         config.access_token = 'ACCESS_TOKEN'
         self.api_client = petstore_api.ApiClient(config)
-        self.pet_api = petstore_api.PetApi(self.api_client)
+        self.pet_api = PetApi(self.api_client)
         self.setUpModels()
         self.setUpFiles()
 
@@ -163,8 +164,8 @@ class PetApiTests(unittest.TestCase):
         self.pet_api.add_pet(self.pet, _request_timeout=(1, 2))
 
     def test_separate_default_client_instances(self):
-        pet_api = petstore_api.PetApi()
-        pet_api2 = petstore_api.PetApi()
+        pet_api = PetApi()
+        pet_api2 = PetApi()
         self.assertNotEqual(pet_api.api_client, pet_api2.api_client)
 
         pet_api.api_client.user_agent = 'api client 3'
@@ -173,8 +174,8 @@ class PetApiTests(unittest.TestCase):
         self.assertNotEqual(pet_api.api_client.user_agent, pet_api2.api_client.user_agent)
 
     def test_separate_default_config_instances(self):
-        pet_api = petstore_api.PetApi()
-        pet_api2 = petstore_api.PetApi()
+        pet_api = PetApi()
+        pet_api2 = PetApi()
         self.assertNotEqual(pet_api.api_client.configuration, pet_api2.api_client.configuration)
 
         pet_api.api_client.configuration.host = 'somehost'
