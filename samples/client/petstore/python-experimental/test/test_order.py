@@ -29,9 +29,12 @@ class TestOrder(unittest.TestCase):
 
     def testOrder(self):
         """Test Order"""
-        # FIXME: construct object with mandatory attributes with example values
-        # model = Order()  # noqa: E501
-        pass
+        order = Order()
+        order.status = "placed"
+        self.assertEqual("placed", order.status)
+        with self.assertRaises(petstore_api.ApiValueError):
+            order.status = "invalid"
+
 
 
 if __name__ == '__main__':
