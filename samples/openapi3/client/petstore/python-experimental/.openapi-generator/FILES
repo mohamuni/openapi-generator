@@ -192,4 +192,11 @@ setup.cfg
 setup.py
 test-requirements.txt
 test/__init__.py
+test/test_another_fake_api.py
+test/test_default_api.py
+test/test_fake_api.py
+test/test_fake_classname_tags_123_api.py
+test/test_pet_api.py
+test/test_store_api.py
+test/test_user_api.py
 tox.ini
