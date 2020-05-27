@@ -26,6 +26,7 @@ from six.moves.urllib.parse import urlencode, urlparse
 
 import petstore_api
 from petstore_api.models import category, tag, pet
+from petstore_api.api.pet_api import PetApi
 from petstore_api import Configuration, signing
 from petstore_api.rest import (
     RESTClientObject,
@@ -287,7 +288,7 @@ class PetApiTests(unittest.TestCase):
         config.access_token = None
 
         api_client = petstore_api.ApiClient(config)
-        pet_api = petstore_api.PetApi(api_client)
+        pet_api = PetApi(api_client)
 
         mock_pool = MockPoolManager(self)
         api_client.rest_client.pool_manager = mock_pool
@@ -318,7 +319,7 @@ class PetApiTests(unittest.TestCase):
         config.access_token = None
 
         api_client = petstore_api.ApiClient(config)
-        pet_api = petstore_api.PetApi(api_client)
+        pet_api = PetApi(api_client)
 
         mock_pool = MockPoolManager(self)
         api_client.rest_client.pool_manager = mock_pool
@@ -354,7 +355,7 @@ class PetApiTests(unittest.TestCase):
         config.access_token = None
 
         api_client = petstore_api.ApiClient(config)
-        pet_api = petstore_api.PetApi(api_client)
+        pet_api = PetApi(api_client)
 
         mock_pool = MockPoolManager(self)
         api_client.rest_client.pool_manager = mock_pool
@@ -390,7 +391,7 @@ class PetApiTests(unittest.TestCase):
         config.access_token = None
 
         api_client = petstore_api.ApiClient(config)
-        pet_api = petstore_api.PetApi(api_client)
+        pet_api = PetApi(api_client)
 
         mock_pool = MockPoolManager(self)
         api_client.rest_client.pool_manager = mock_pool
@@ -426,7 +427,7 @@ class PetApiTests(unittest.TestCase):
         config.access_token = None
 
         api_client = petstore_api.ApiClient(config)
-        pet_api = petstore_api.PetApi(api_client)
+        pet_api = PetApi(api_client)
 
         mock_pool = MockPoolManager(self)
         api_client.rest_client.pool_manager = mock_pool
