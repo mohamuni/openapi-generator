@@ -12,6 +12,8 @@
 # sys.setrecursionlimit(n)
 
 # import apis into api package
-{{#apiInfo}}{{#apis}}
+{{#apiInfo}}
+{{#apis}}
 from {{apiPackage}}.{{classVarName}} import {{classname}}
-{{/apis}}{{/apiInfo}}
+{{/apis}}
+{{/apiInfo}}
