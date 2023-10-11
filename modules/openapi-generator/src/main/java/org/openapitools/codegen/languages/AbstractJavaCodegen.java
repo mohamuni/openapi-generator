@@ -70,7 +70,6 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
     public static final String DATE_LIBRARY = "dateLibrary";
     public static final String SUPPORT_ASYNC = "supportAsync";
     public static final String WITH_XML = "withXml";
-    public static final String SUPPORT_JAVA6 = "supportJava6";
     public static final String DISABLE_HTML_ESCAPING = "disableHtmlEscaping";
     public static final String BOOLEAN_GETTER_PREFIX = "booleanGetterPrefix";
     public static final String IGNORE_ANYOF_IN_ENUM = "ignoreAnyOfInEnum";
@@ -83,6 +82,7 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
     public static final String TEST_OUTPUT = "testOutput";
     public static final String IMPLICIT_HEADERS = "implicitHeaders";
     public static final String IMPLICIT_HEADERS_REGEX = "implicitHeadersRegex";
+    public static final String AUTOSET_CONSTANTS = "autosetConstants";
     public static final String JAVAX_PACKAGE = "javaxPackage";
     public static final String USE_JAKARTA_EE = "useJakartaEe";
     public static final String CONTAINER_DEFAULT_TO_NULL = "containerDefaultToNull";
@@ -120,7 +120,6 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
     protected boolean serializeBigDecimalAsString = false;
     protected String apiDocPath = "docs/";
     protected String modelDocPath = "docs/";
-    protected boolean supportJava6 = false;
     protected boolean disableHtmlEscaping = false;
     protected String booleanGetterPrefix = "get";
     protected boolean ignoreAnyOfInEnum = false;
@@ -137,6 +136,7 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
     protected AnnotationLibrary annotationLibrary;
     protected boolean implicitHeaders = false;
     protected String implicitHeadersRegex = null;
+    protected boolean autosetConstants = false;
     protected boolean camelCaseDollarSign = false;
     protected boolean useJakartaEe = false;
     protected boolean containerDefaultToNull = false;
@@ -196,7 +196,7 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
                         "import", "public", "throws", "case", "enum", "instanceof", "return", "transient",
                         "catch", "extends", "int", "short", "try", "char", "final", "interface", "static",
                         "void", "class", "finally", "long", "strictfp", "volatile", "const", "float",
-                        "native", "super", "while", "null")
+                        "native", "super", "while", "null", "offsetdatetime", "localdate", "localtime")
         );
 
         languageSpecificPrimitives = Sets.newHashSet("String",
@@ -358,11 +358,6 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
             LOGGER.info("Environment variable JAVA_POST_PROCESS_FILE not defined so the Java code may not be properly formatted. To define it, try 'export JAVA_POST_PROCESS_FILE=\"/usr/local/bin/clang-format -i\"' (Linux/Mac)");
             LOGGER.info("NOTE: To enable file post-processing, 'enablePostProcessFile' must be set to `true` (--enable-post-process-file for CLI).");
         }
-
-        if (additionalProperties.containsKey(SUPPORT_JAVA6)) {
-            this.setSupportJava6(Boolean.parseBoolean(additionalProperties.get(SUPPORT_JAVA6).toString()));
-        }
-        additionalProperties.put(SUPPORT_JAVA6, supportJava6);
 
         if (additionalProperties.containsKey(DISABLE_HTML_ESCAPING)) {
             this.setDisableHtmlEscaping(Boolean.parseBoolean(additionalProperties.get(DISABLE_HTML_ESCAPING).toString()));
@@ -561,6 +556,10 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
 
         if (additionalProperties.containsKey(IMPLICIT_HEADERS_REGEX)) {
             this.setImplicitHeadersRegex(additionalProperties.get(IMPLICIT_HEADERS_REGEX).toString());
+        }
+
+        if (additionalProperties.containsKey(AUTOSET_CONSTANTS)) {
+            this.setAutosetConstants(Boolean.parseBoolean(additionalProperties.get(AUTOSET_CONSTANTS).toString()));
         }
 
         if (additionalProperties.containsKey(CAMEL_CASE_DOLLAR_SIGN)) {
@@ -986,10 +985,10 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
                         final_values.add(element.asText());
                     });
                 } else if (schema.getDefault() instanceof Collection) {
-                    var _default = (Collection<String>) schema.getDefault();
+                    var _default = (Collection<Object>) schema.getDefault();
                     List<String> final_values = _values;
                     _default.forEach((element) -> {
-                        final_values.add(element);
+                        final_values.add(String.valueOf(element));
                     });
                 } else { // single value
                     _values = java.util.Collections.singletonList(String.valueOf(schema.getDefault()));
@@ -1062,7 +1061,7 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
             } else { // has default value
                 return toArrayDefaultValue(cp, schema);
             }
-        } else if (ModelUtils.isMapSchema(schema) && !(schema instanceof ComposedSchema)) {
+        } else if (ModelUtils.isMapSchema(schema) && !(ModelUtils.isComposedSchema(schema))) {
             if (schema.getProperties() != null && schema.getProperties().size() > 0) {
                 // object is complex object with free-form additional properties
                 if (schema.getDefault() != null) {
@@ -1349,8 +1348,7 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
         if (example == null) {
             example = "null";
         } else if (Boolean.TRUE.equals(p.isArray)) {
-
-            if (p.items.defaultValue != null) {
+            if (p.items != null && p.items.defaultValue != null) {
                 String innerExample;
                 if ("String".equals(p.items.dataType)) {
                     innerExample = "\"" + p.items.defaultValue + "\"";
@@ -1471,12 +1469,21 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
             }
         }
 
+        // hard-coded Arrays import in Java client as it has been removed from the templates
+        if (this instanceof JavaClientCodegen &&
+                ("jersey2".equals(library) ||
+                        "jersey3".equals(library) ||
+                        "native".equals(library) ||
+                        "okhttp-gson".equals(library))) {
+            model.imports.add("Arrays");
+        }
+
         if ("array".equals(property.containerType)) {
             model.imports.add("ArrayList");
+            model.imports.add("Arrays");
         } else if ("set".equals(property.containerType)) {
             model.imports.add("LinkedHashSet");
-            boolean canNotBeWrappedToNullable = !openApiNullable || !property.isNullable;
-            if (canNotBeWrappedToNullable) {
+            if (!openApiNullable || !property.isNullable) { // cannot be wrapped to nullable
                 model.imports.add("JsonDeserialize");
                 property.vendorExtensions.put("x-setter-extra-annotation", "@JsonDeserialize(as = LinkedHashSet.class)");
             }
@@ -1570,6 +1577,7 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
             op.vendorExtensions.put("x-java-import", operationImports);
 
             handleImplicitHeaders(op);
+            handleConstantParams(op);
         }
 
         return objs;
@@ -1637,11 +1645,11 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
                                     .map(Schema::getProperties))
                     .forEach(schemas -> schemas.replaceAll(
                             (name, s) -> Stream.of(s)
-                                    .filter(schema -> schema instanceof ComposedSchema)
-                                    .map(schema -> (ComposedSchema) schema)
-                                    .filter(schema -> Objects.nonNull(schema.getAnyOf()))
-                                    .flatMap(schema -> schema.getAnyOf().stream())
-                                    .filter(schema -> Objects.nonNull(schema.getEnum()))
+                                    .filter(schema -> ModelUtils.isComposedSchema((Schema) schema))
+                                    //.map(schema -> (ComposedSchema) schema)
+                                    .filter(schema -> Objects.nonNull(((Schema) schema).getAnyOf()))
+                                    .flatMap(schema -> ((Schema) schema).getAnyOf().stream())
+                                    .filter(schema -> Objects.nonNull(((Schema) schema).getEnum()))
                                     .findFirst()
                                     .orElse((Schema) s)));
         }
@@ -2044,6 +2052,10 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
         this.implicitHeadersRegex = implicitHeadersRegex;
     }
 
+    public void setAutosetConstants(boolean autosetConstants) {
+        this.autosetConstants = autosetConstants;
+    }
+
     public void setCamelCaseDollarSign(boolean camelCaseDollarSign) {
         this.camelCaseDollarSign = camelCaseDollarSign;
     }
@@ -2097,10 +2109,6 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
             return version;
         }
         return version + "-SNAPSHOT";
-    }
-
-    public void setSupportJava6(boolean value) {
-        this.supportJava6 = value;
     }
 
     @Override
@@ -2280,6 +2288,45 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
                 operation.headerParams.removeIf(header -> header.baseName.equals(p.baseName));
                 LOGGER.info("Update operation [{}]. Remove header [{}] because it's marked to be implicit", operation.operationId, p.baseName);
             } else {
+                operation.allParams.add(p);
+            }
+        }
+        operation.hasParams = !operation.allParams.isEmpty();
+    }
+
+    /**
+     * This method removes all constant Query, Header and Cookie Params from allParams and sets them as constantParams in the CodegenOperation.
+     * The definition of constant is single valued required enum params.
+     * The constantParams in the the generated code should be hardcoded to the constantValue if autosetConstants feature is enabled.
+     *
+     * @param operation - operation to be processed
+     */
+    protected void handleConstantParams(CodegenOperation operation) {
+        if (!autosetConstants || operation.allParams.isEmpty()) {            
+            return;
+        }
+        final ArrayList<CodegenParameter> copy = new ArrayList<>(operation.allParams);
+        // Remove all params from Params, Non constant params will be added back later.
+        operation.allParams.clear();
+
+        // Finds all constant params, removes them from allParams and adds them to constant params.
+        // Also, adds back non constant params to allParams.
+        for (CodegenParameter p : copy) {
+            if (p.isEnum && p.required && p._enum != null && p._enum.size() == 1) {
+                // Add to constantParams for use in the code generation templates. 
+                operation.constantParams.add(p);
+                if(p.isQueryParam) {
+                    operation.queryParams.removeIf(param -> param.baseName.equals(p.baseName));
+                }
+                if(p.isHeaderParam) {
+                    operation.headerParams.removeIf(param -> param.baseName.equals(p.baseName));
+                }
+                if(p.isCookieParam) {
+                    operation.cookieParams.removeIf(param -> param.baseName.equals(p.baseName));
+                }
+                LOGGER.info("Update operation [{}]. Remove parameter [{}] because it can only have a fixed value of [{}]", operation.operationId, p.baseName, p._enum.get(0));
+            } else {
+                // Add back to allParams as the param is not a constant.
                 operation.allParams.add(p);
             }
         }

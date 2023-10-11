@@ -1164,7 +1164,7 @@ public class DefaultCodegenTest {
         sc = openAPI.getComponents().getSchemas().get(modelName);
         cm = codegen.fromModel(modelName, sc);
         hs.clear();
-        hs.add(new CodegenDiscriminator.MappedModel("b", codegen.toModelName("B")));
+        hs.add(new CodegenDiscriminator.MappedModel("b", codegen.toModelName("B"), true));
         hs.add(new CodegenDiscriminator.MappedModel("C", codegen.toModelName("C")));
         Assert.assertEquals(cm.getHasDiscriminatorWithNonEmptyMapping(), true);
         Assert.assertEquals(cm.discriminator.getMappedModels(), hs);
@@ -1174,7 +1174,7 @@ public class DefaultCodegenTest {
         sc = openAPI.getComponents().getSchemas().get(modelName);
         cm = codegen.fromModel(modelName, sc);
         hs.clear();
-        hs.add(new CodegenDiscriminator.MappedModel("b", codegen.toModelName("B")));
+        hs.add(new CodegenDiscriminator.MappedModel("b", codegen.toModelName("B"), true));
         hs.add(new CodegenDiscriminator.MappedModel("C", codegen.toModelName("C")));
         Assert.assertEquals(cm.getHasDiscriminatorWithNonEmptyMapping(), true);
         Assert.assertEquals(cm.discriminator.getMappedModels(), hs);
@@ -1184,7 +1184,7 @@ public class DefaultCodegenTest {
         sc = openAPI.getComponents().getSchemas().get(modelName);
         cm = codegen.fromModel(modelName, sc);
         hs.clear();
-        hs.add(new CodegenDiscriminator.MappedModel("b", codegen.toModelName("B")));
+        hs.add(new CodegenDiscriminator.MappedModel("b", codegen.toModelName("B"), true));
         Assert.assertEquals(cm.getHasDiscriminatorWithNonEmptyMapping(), true);
         Assert.assertEquals(cm.discriminator.getMappedModels(), hs);
     }
@@ -1265,7 +1265,7 @@ public class DefaultCodegenTest {
         sc = openAPI.getComponents().getSchemas().get(modelName);
         cm = codegen.fromModel(modelName, sc);
         hs.clear();
-        hs.add(new CodegenDiscriminator.MappedModel("b", codegen.toModelName("B")));
+        hs.add(new CodegenDiscriminator.MappedModel("b", codegen.toModelName("B"), true));
         Assert.assertEquals(cm.discriminator.getMappedModels(), hs);
 
         // the mapping in b is in B
@@ -1530,6 +1530,25 @@ public class DefaultCodegenTest {
     }
 
     @Test
+    public void testComposedSchemaOneOfDiscriminatorMapPreAndPostFix() {
+        final OpenAPI openAPI = TestUtils.parseFlattenSpec("src/test/resources/3_0/oneOfDiscriminator.yaml");
+        DefaultCodegen codegen = new DefaultCodegen();
+        codegen.setLegacyDiscriminatorBehavior(false);
+        codegen.setOpenAPI(openAPI);
+        codegen.setModelNamePrefix("Transfer");
+        codegen.setModelNameSuffix("Dto");
+        String modelName;
+        Schema sc;
+        CodegenModel cm;
+
+        // ref oneOf models with enum property discriminator
+        modelName = "FruitOneOfEnumMappingDisc";
+        sc = openAPI.getComponents().getSchemas().get(modelName);
+        cm = codegen.fromModel(modelName, sc);
+        assertThat(cm.discriminator.getPropertyType()).isEqualTo("TransferFruitTypeEnumDto");
+    }
+
+    @Test
     public void testComposedSchemaMyPetsOneOfDiscriminatorMap() {
         final OpenAPI openAPI = TestUtils.parseFlattenSpec("src/test/resources/3_0/allOf_composition_discriminator.yaml");
 
@@ -1654,8 +1673,8 @@ public class DefaultCodegenTest {
         discriminator.setPropertyBaseName(prop);
         discriminator.setMapping(null);
         discriminator.setMappedModels(new HashSet<CodegenDiscriminator.MappedModel>() {{
-            add(new CodegenDiscriminator.MappedModel("daily", "DailySubObj"));
-            add(new CodegenDiscriminator.MappedModel("sub-obj", "SubObj"));
+            add(new CodegenDiscriminator.MappedModel("daily", "DailySubObj", true));
+            add(new CodegenDiscriminator.MappedModel("sub-obj", "SubObj", true));
         }});
         assertEquals(cm.discriminator, discriminator);
     }
@@ -2049,8 +2068,8 @@ public class DefaultCodegenTest {
         test.setMapping(new HashMap<>());
         test.getMapping().put("a", "#/components/schemas/Adult");
         test.getMapping().put("c", "Child");
-        test.getMappedModels().add(new CodegenDiscriminator.MappedModel("a", "Adult"));
-        test.getMappedModels().add(new CodegenDiscriminator.MappedModel("c", "Child"));
+        test.getMappedModels().add(new CodegenDiscriminator.MappedModel("a", "Adult", true));
+        test.getMappedModels().add(new CodegenDiscriminator.MappedModel("c", "Child", true));
         Assert.assertEquals(discriminator, test);
     }
 
@@ -2616,7 +2635,7 @@ public class DefaultCodegenTest {
         cm = codegen.fromModel(modelName, sc);
         CodegenProperty stringCp = codegen.fromProperty("additional_properties", new Schema().type("string"));
         assertEquals(cm.getAdditionalProperties(), stringCp);
-        assertFalse(cm.getAdditionalPropertiesIsAnyType());
+        assertTrue(cm.getAdditionalPropertiesIsAnyType());
     }
 
     @Test
@@ -2656,7 +2675,7 @@ public class DefaultCodegenTest {
         assertFalse(mapWithAddPropsFalse.getAdditionalPropertiesIsAnyType());
         mapWithAddPropsSchema = cm.getVars().get(3);
         assertEquals(mapWithAddPropsSchema.getAdditionalProperties(), stringCp);
-        assertFalse(mapWithAddPropsSchema.getAdditionalPropertiesIsAnyType());
+        assertTrue(mapWithAddPropsSchema.getAdditionalPropertiesIsAnyType());
 
         modelName = "ObjectModelWithAddPropsInProps";
         sc = openAPI.getComponents().getSchemas().get(modelName);
@@ -2672,7 +2691,7 @@ public class DefaultCodegenTest {
         assertFalse(mapWithAddPropsFalse.getAdditionalPropertiesIsAnyType());
         mapWithAddPropsSchema = cm.getVars().get(3);
         assertEquals(mapWithAddPropsSchema.getAdditionalProperties(), stringCp);
-        assertFalse(mapWithAddPropsSchema.getAdditionalPropertiesIsAnyType());
+        assertTrue(mapWithAddPropsSchema.getAdditionalPropertiesIsAnyType());
 
         if (isGenerateAliasAsModel) { // restore the setting
             GlobalSettings.setProperty("generateAliasAsModel", "true");
@@ -2717,7 +2736,7 @@ public class DefaultCodegenTest {
         assertFalse(mapWithAddPropsFalse.getAdditionalPropertiesIsAnyType());
         mapWithAddPropsSchema = co.queryParams.get(3);
         assertEquals(mapWithAddPropsSchema.getAdditionalProperties(), stringCp);
-        assertFalse(mapWithAddPropsSchema.getAdditionalPropertiesIsAnyType());
+        assertTrue(mapWithAddPropsSchema.getAdditionalPropertiesIsAnyType());
 
         path = "/additional_properties/";
         operation = openAPI.getPaths().get(path).getPost();
@@ -2733,7 +2752,7 @@ public class DefaultCodegenTest {
         assertFalse(mapWithAddPropsFalse.getAdditionalPropertiesIsAnyType());
         mapWithAddPropsSchema = co.queryParams.get(3);
         assertEquals(mapWithAddPropsSchema.getAdditionalProperties(), stringCp);
-        assertFalse(mapWithAddPropsSchema.getAdditionalPropertiesIsAnyType());
+        assertTrue(mapWithAddPropsSchema.getAdditionalPropertiesIsAnyType());
 
         if (isGenerateAliasAsModel) { // restore the setting
             GlobalSettings.setProperty("generateAliasAsModel", "true");
@@ -2778,7 +2797,7 @@ public class DefaultCodegenTest {
         assertFalse(mapWithAddPropsFalse.getAdditionalPropertiesIsAnyType());
         mapWithAddPropsSchema = co.responses.get(3);
         assertEquals(mapWithAddPropsSchema.getAdditionalProperties(), stringCp);
-        assertFalse(mapWithAddPropsSchema.getAdditionalPropertiesIsAnyType());
+        assertTrue(mapWithAddPropsSchema.getAdditionalPropertiesIsAnyType());
 
         path = "/additional_properties/";
         operation = openAPI.getPaths().get(path).getPost();
@@ -2794,7 +2813,7 @@ public class DefaultCodegenTest {
         assertFalse(mapWithAddPropsFalse.getAdditionalPropertiesIsAnyType());
         mapWithAddPropsSchema = co.responses.get(3);
         assertEquals(mapWithAddPropsSchema.getAdditionalProperties(), stringCp);
-        assertFalse(mapWithAddPropsSchema.getAdditionalPropertiesIsAnyType());
+        assertTrue(mapWithAddPropsSchema.getAdditionalPropertiesIsAnyType());
 
         if (isGenerateAliasAsModel) { // restore the setting
             GlobalSettings.setProperty("generateAliasAsModel", "true");

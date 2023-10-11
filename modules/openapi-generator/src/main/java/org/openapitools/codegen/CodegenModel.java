@@ -149,7 +149,10 @@ public class CodegenModel implements IJsonSchemaValidationProperties {
     public String additionalPropertiesType;
 
     /**
-     * True if additionalProperties is set to true (boolean value)
+     * True if additionalProperties is set to true (boolean value), any type, free form object, etc
+     *
+     * TODO: we may rename this to isAdditionalPropertiesEnabled or something
+     * else to avoid confusions
      */
     public boolean isAdditionalPropertiesTrue;
 
@@ -997,6 +1000,82 @@ public class CodegenModel implements IJsonSchemaValidationProperties {
     }
 
     @Override
+    public boolean getIsFloat() {
+        return isFloat;
+    }
+
+    @Override
+    public void setIsFloat(boolean isFloat) {
+        this.isFloat = isFloat;
+    }
+
+    @Override
+    public boolean getIsDouble() {
+        return isDouble;
+    }
+
+    @Override
+    public void setIsDouble(boolean isDouble) {
+        this.isDouble = isDouble;
+    }
+
+    @Override
+    public boolean getIsInteger() {
+        return isInteger;
+    }
+
+    @Override
+    public void setIsInteger(boolean isInteger) {
+        this.isInteger = isInteger;
+    }
+
+    @Override
+    public boolean getIsLong() {
+        return isLong;
+    }
+
+    @Override
+    public void setIsLong(boolean isLong) {
+        this.isLong = isLong;
+    }
+
+    @Override
+    public boolean getIsBinary() {
+        return false;
+    }
+
+    @Override
+    public void setIsBinary(boolean isBinary) {}
+
+    @Override
+    public boolean getIsByteArray() {
+        return false;
+    }
+
+    @Override
+    public void setIsByteArray(boolean isByteArray) {}
+
+    @Override
+    public boolean getIsDecimal() {
+        return isDecimal;
+    }
+
+    @Override
+    public void setIsDecimal(boolean isDecimal) {
+        this.isDecimal = isDecimal;
+    }
+
+    @Override
+    public boolean getIsEnum() {
+        return isEnum;
+    }
+
+    @Override
+    public void setIsEnum(boolean isEnum) {
+        this.isEnum = isEnum;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof CodegenModel)) return false;
@@ -1088,6 +1167,7 @@ public class CodegenModel implements IJsonSchemaValidationProperties {
                 Objects.equals(externalDocumentation, that.externalDocumentation) &&
                 Objects.equals(vendorExtensions, that.vendorExtensions) &&
                 Objects.equals(additionalPropertiesType, that.additionalPropertiesType) &&
+                Objects.equals(isAdditionalPropertiesTrue, that.isAdditionalPropertiesTrue) &&
                 Objects.equals(getMaxProperties(), that.getMaxProperties()) &&
                 Objects.equals(getMinProperties(), that.getMinProperties()) &&
                 Objects.equals(getMaxItems(), that.getMaxItems()) &&
@@ -1193,6 +1273,7 @@ public class CodegenModel implements IJsonSchemaValidationProperties {
         sb.append(", externalDocumentation=").append(externalDocumentation);
         sb.append(", vendorExtensions=").append(vendorExtensions);
         sb.append(", additionalPropertiesType='").append(additionalPropertiesType).append('\'');
+        sb.append(", isAdditionalPropertiesTrue='").append(isAdditionalPropertiesTrue).append('\'');
         sb.append(", maxProperties=").append(maxProperties);
         sb.append(", minProperties=").append(minProperties);
         sb.append(", uniqueItems=").append(uniqueItems);

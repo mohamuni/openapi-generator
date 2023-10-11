@@ -93,8 +93,6 @@ public class KotlinClientCodegen extends AbstractKotlinCodegen {
     protected String dateLibrary = DateLibrary.JAVA8.value;
     protected String requestDateConverter = RequestDateConverter.TO_JSON.value;
     protected String collectionType = CollectionType.LIST.value;
-    protected boolean useRxJava = false;
-    protected boolean useRxJava2 = false;
     protected boolean useRxJava3 = false;
     protected boolean useCoroutines = false;
     // backwards compatibility for openapi configs that specify neither rx1 nor rx2
@@ -106,6 +104,9 @@ public class KotlinClientCodegen extends AbstractKotlinCodegen {
 
     protected String authFolder;
 
+    protected SERIALIZATION_LIBRARY_TYPE serializationLibrary = SERIALIZATION_LIBRARY_TYPE.moshi;
+    public static final String SERIALIZATION_LIBRARY_DESC = "What serialization library to use: 'moshi' (default), or 'gson' or 'jackson' or 'kotlinx_serialization'";
+    public enum SERIALIZATION_LIBRARY_TYPE {moshi, gson, jackson, kotlinx_serialization}
 
     public enum DateLibrary {
         STRING("string"),
@@ -216,7 +217,7 @@ public class KotlinClientCodegen extends AbstractKotlinCodegen {
 
         supportedLibraries.put(JVM_KTOR, "Platform: Java Virtual Machine. HTTP client: Ktor 1.6.7. JSON processing: Gson, Jackson (default).");
         supportedLibraries.put(JVM_OKHTTP4, "[DEFAULT] Platform: Java Virtual Machine. HTTP client: OkHttp 4.2.0 (Android 5.0+ and Java 8+). JSON processing: Moshi 1.8.0.");
-        supportedLibraries.put(JVM_OKHTTP3, "Platform: Java Virtual Machine. HTTP client: OkHttp 3.12.4 (Android 2.3+ and Java 7+). JSON processing: Moshi 1.8.0.");
+        supportedLibraries.put(JVM_OKHTTP3, "Platform: Java Virtual Machine. HTTP client: OkHttp 3.12.4 (Android 2.3+ and Java 7+). JSON processing: Moshi 1.8.0. (DEPRECATED: this option will be remove in 7.x release)");
         supportedLibraries.put(JVM_SPRING_WEBCLIENT, "Platform: Java Virtual Machine. HTTP: Spring 5 (or 6 with useSpringBoot3 enabled) WebClient. JSON processing: Jackson.");
         supportedLibraries.put(JVM_RETROFIT2, "Platform: Java Virtual Machine. HTTP client: Retrofit 2.6.2.");
         supportedLibraries.put(MULTIPLATFORM, "Platform: Kotlin multiplatform. HTTP client: Ktor 1.6.7. JSON processing: Kotlinx Serialization: 1.2.1.");
@@ -252,6 +253,9 @@ public class KotlinClientCodegen extends AbstractKotlinCodegen {
         cliOptions.add(CliOption.newBoolean(GENERATE_ROOM_MODELS, "Generate Android Room database models in addition to API models (JVM Volley library only)", false));
 
         cliOptions.add(CliOption.newBoolean(SUPPORT_ANDROID_API_LEVEL_25_AND_BELLOW, "[WARNING] This flag will generate code that has a known security vulnerability. It uses `kotlin.io.createTempFile` instead of `java.nio.file.Files.createTempFile` in order to support Android API level 25 and bellow. For more info, please check the following links https://github.com/OpenAPITools/openapi-generator/security/advisories/GHSA-23x4-m842-fmwf, https://github.com/OpenAPITools/openapi-generator/pull/9284"));
+
+        CliOption serializationLibraryOpt = new CliOption(CodegenConstants.SERIALIZATION_LIBRARY, SERIALIZATION_LIBRARY_DESC);
+        cliOptions.add(serializationLibraryOpt.defaultValue(serializationLibrary.name()));
     }
 
     public CodegenType getTag() {
@@ -321,6 +325,28 @@ public class KotlinClientCodegen extends AbstractKotlinCodegen {
 
     public void setOmitGradleWrapper(boolean omitGradleWrapper) {
         this.omitGradleWrapper = omitGradleWrapper;
+    }
+
+    public SERIALIZATION_LIBRARY_TYPE getSerializationLibrary() {
+        return this.serializationLibrary;
+    }
+
+    /**
+     * Sets the serialization engine for Kotlin
+     *
+     * @param enumSerializationLibrary The string representation of the serialization library as defined by
+     *                                 {@link org.openapitools.codegen.languages.AbstractKotlinCodegen.SERIALIZATION_LIBRARY_TYPE}
+     */
+    public void setSerializationLibrary(final String enumSerializationLibrary) {
+        try {
+            this.serializationLibrary = SERIALIZATION_LIBRARY_TYPE.valueOf(enumSerializationLibrary);
+        } catch (IllegalArgumentException ex) {
+            StringBuilder sb = new StringBuilder(enumSerializationLibrary + " is an invalid enum property naming option. Please choose from:");
+            for (SERIALIZATION_LIBRARY_TYPE t : SERIALIZATION_LIBRARY_TYPE.values()) {
+                sb.append("\n  ").append(t.name());
+            }
+            throw new RuntimeException(sb.toString());
+        }
     }
 
     @Override
@@ -403,6 +429,13 @@ public class KotlinClientCodegen extends AbstractKotlinCodegen {
 
         if (additionalProperties.containsKey(OMIT_GRADLE_WRAPPER)) {
             setOmitGradleWrapper(Boolean.parseBoolean(additionalProperties.get(OMIT_GRADLE_WRAPPER).toString()));
+        }
+
+        if (additionalProperties.containsKey(CodegenConstants.SERIALIZATION_LIBRARY)) {
+            setSerializationLibrary((String) additionalProperties.get(CodegenConstants.SERIALIZATION_LIBRARY));
+            additionalProperties.put(this.serializationLibrary.name(), true);
+        } else {
+            additionalProperties.put(this.serializationLibrary.name(), true);
         }
 
         commonSupportingFiles();
@@ -828,9 +861,11 @@ public class KotlinClientCodegen extends AbstractKotlinCodegen {
     public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List<ModelMap> allModels) {
         super.postProcessOperationsWithModels(objs, allModels);
         OperationMap operations = objs.getOperations();
+        boolean isResponseFile = false;
         if (operations != null) {
             List<CodegenOperation> ops = operations.getOperation();
             for (CodegenOperation operation : ops) {
+                isResponseFile = isResponseFile || operation.isResponseFile;
 
                 if (JVM_RETROFIT2.equals(getLibrary()) && StringUtils.isNotEmpty(operation.path) && operation.path.startsWith("/")) {
                     operation.path = operation.path.substring(1);
@@ -851,7 +886,7 @@ public class KotlinClientCodegen extends AbstractKotlinCodegen {
                         ).trim();
                         return "multipart/form-data".equals(mediaType)
                                 || "application/x-www-form-urlencoded".equals(mediaType)
-                                || (mediaType.startsWith("application/") && mediaType.endsWith("json"));
+                                || (mediaType.startsWith("application/") && (mediaType.endsWith("json") || mediaType.endsWith("octet-stream")));
                     };
                     operation.consumes = operation.consumes == null ? null : operation.consumes.stream()
                             .filter(isSerializable)
@@ -907,6 +942,7 @@ public class KotlinClientCodegen extends AbstractKotlinCodegen {
                 }
             }
         }
+        objs.put("isResponseFile", isResponseFile);
         return objs;
     }
 
