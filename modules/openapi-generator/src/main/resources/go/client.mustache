@@ -487,6 +487,13 @@ func (c *APIClient) prepareRequest(
 		c.cfg.Middleware(localVarRequest)
 	}
 
+	if c.cfg.MiddlewareWithError != nil {
+		err = c.cfg.MiddlewareWithError(localVarRequest)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 {{/withCustomMiddlewareFunction}}
 {{#hasHttpSignatureMethods}}
 	if ctx != nil {
@@ -521,6 +528,7 @@ func (c *APIClient) decode(v interface{}, b []byte, contentType string) (err err
 			return
 		}
 		_, err = f.Seek(0, io.SeekStart)
+		err = os.Remove(f.Name())
 		return
 	}
 	if f, ok := v.(**os.File); ok {
@@ -533,6 +541,7 @@ func (c *APIClient) decode(v interface{}, b []byte, contentType string) (err err
 			return
 		}
 		_, err = (*f).Seek(0, io.SeekStart)
+		err = os.Remove((*f).Name())
 		return
 	}
 	if xmlCheck.MatchString(contentType) {

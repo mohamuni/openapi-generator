@@ -17,6 +17,8 @@
 
 package org.openapitools.codegen.languages;
 
+import com.samskivert.mustache.Mustache;
+import com.samskivert.mustache.Template;
 import io.swagger.v3.oas.models.media.Schema;
 import org.apache.commons.lang3.StringUtils;
 import org.openapitools.codegen.*;
@@ -30,6 +32,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.*;
 
 import static org.openapitools.codegen.utils.StringUtils.camelize;
@@ -45,6 +49,7 @@ public class RubyClientCodegen extends AbstractRubyCodegen {
     public static final String GEM_AUTHOR = "gemAuthor";
     public static final String GEM_AUTHOR_EMAIL = "gemAuthorEmail";
     public static final String FARADAY = "faraday";
+    public static final String HTTPX = "httpx";
     public static final String TYPHOEUS = "typhoeus";
     public static final String USE_AUTOLOAD = "useAutoload";
     private final Logger LOGGER = LoggerFactory.getLogger(RubyClientCodegen.class);
@@ -172,6 +177,7 @@ public class RubyClientCodegen extends AbstractRubyCodegen {
                 defaultValue(Boolean.FALSE.toString()));
 
         supportedLibraries.put(FARADAY, "Faraday >= 1.0.1 (https://github.com/lostisland/faraday)");
+        supportedLibraries.put(HTTPX, "HTTPX >= 1.0.0 (https://gitlab.com/os85/httpx)");
         supportedLibraries.put(TYPHOEUS, "Typhoeus >= 1.0.1 (https://github.com/typhoeus/typhoeus)");
 
         CliOption libraryOption = new CliOption(CodegenConstants.LIBRARY, "HTTP library template (sub-template) to use");
@@ -270,11 +276,15 @@ public class RubyClientCodegen extends AbstractRubyCodegen {
 
         if (TYPHOEUS.equals(getLibrary())) {
             // for Typhoeus
+            additionalProperties.put("isTyphoeus", Boolean.TRUE);
         } else if (FARADAY.equals(getLibrary())) {
             // for Faraday
             additionalProperties.put("isFaraday", Boolean.TRUE);
+        } else if (HTTPX.equals(getLibrary())) {
+            // for Faraday
+            additionalProperties.put("isHttpx", Boolean.TRUE);
         } else {
-            throw new RuntimeException("Invalid HTTP library " + getLibrary() + ". Only faraday, typhoeus are supported.");
+            throw new RuntimeException("Invalid HTTP library " + getLibrary() + ". Only faraday, typhoeus and httpx are supported.");
         }
 
         // test files should not be overwritten
@@ -286,6 +296,18 @@ public class RubyClientCodegen extends AbstractRubyCodegen {
                 .doNotOverwrite());
         supportingFiles.add(new SupportingFile("api_client_spec.mustache", specFolder, "api_client_spec.rb")
                 .doNotOverwrite());
+
+        // add lambda to convert a symbol to a string if an underscore is included (e.g. :'user_uuid' => 'user_uuid')
+        additionalProperties.put("lambdaFixHeaderKey", new Mustache.Lambda() {
+            @Override
+            public void execute(Template.Fragment fragment, Writer writer) throws IOException {
+                String content = fragment.execute();
+                if (content.contains("_")) {
+                    content = content.substring(1);
+                }
+                writer.write(content);
+            }
+        });
     }
 
     @Override

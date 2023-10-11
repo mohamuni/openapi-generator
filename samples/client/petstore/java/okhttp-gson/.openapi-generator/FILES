@@ -80,6 +80,7 @@ docs/Quadrilateral.md
 docs/QuadrilateralInterface.md
 docs/ReadOnlyFirst.md
 docs/Scalar.md
+docs/ScalarAnyOf.md
 docs/ScaleneTriangle.md
 docs/Shape.md
 docs/ShapeInterface.md
@@ -88,6 +89,7 @@ docs/SimpleQuadrilateral.md
 docs/SpecialModelName.md
 docs/StoreApi.md
 docs/Tag.md
+docs/TestInlineFreeformAdditionalPropertiesRequest.md
 docs/Triangle.md
 docs/TriangleInterface.md
 docs/User.md
@@ -206,6 +208,7 @@ src/main/java/org/openapitools/client/model/Quadrilateral.java
 src/main/java/org/openapitools/client/model/QuadrilateralInterface.java
 src/main/java/org/openapitools/client/model/ReadOnlyFirst.java
 src/main/java/org/openapitools/client/model/Scalar.java
+src/main/java/org/openapitools/client/model/ScalarAnyOf.java
 src/main/java/org/openapitools/client/model/ScaleneTriangle.java
 src/main/java/org/openapitools/client/model/Shape.java
 src/main/java/org/openapitools/client/model/ShapeInterface.java
@@ -213,6 +216,7 @@ src/main/java/org/openapitools/client/model/ShapeOrNull.java
 src/main/java/org/openapitools/client/model/SimpleQuadrilateral.java
 src/main/java/org/openapitools/client/model/SpecialModelName.java
 src/main/java/org/openapitools/client/model/Tag.java
+src/main/java/org/openapitools/client/model/TestInlineFreeformAdditionalPropertiesRequest.java
 src/main/java/org/openapitools/client/model/Triangle.java
 src/main/java/org/openapitools/client/model/TriangleInterface.java
 src/main/java/org/openapitools/client/model/User.java
