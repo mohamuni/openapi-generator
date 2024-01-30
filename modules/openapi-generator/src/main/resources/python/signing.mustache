@@ -227,7 +227,7 @@ class HttpSigningConfiguration(object):
         if self.private_key_string is not None:
             pem_data = self.private_key_string
         elif os.path.exists(self.private_key_path):
-            with open(self.private_key_path,'r')as f:
+            with open(self.private_key_path,'r') as f:
                 pem_data = f.read()
         else:
             raise Exception("API Key either in file or as string is not provided.")
