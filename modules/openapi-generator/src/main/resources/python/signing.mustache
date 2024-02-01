@@ -127,7 +127,7 @@ class HttpSigningConfiguration(object):
         private_key_path_exists = False
         if private_key_path and os.path.exists(private_key_path):
             private_key_path_exists =True
-        if not is_private_key_path_exists and private_key_string is None:
+        if not private_key_path_exists and private_key_string is None:
         	raise Exception("Private key file or private key string not provided.")
 	
         self.private_key_path = private_key_path
