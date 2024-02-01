@@ -124,7 +124,7 @@ class HttpSigningConfiguration(object):
         if signing_scheme not in {SCHEME_HS2019, SCHEME_RSA_SHA256, SCHEME_RSA_SHA512}:
             raise Exception("Unsupported security scheme: {0}".format(signing_scheme))
         self.signing_scheme = signing_scheme
-        is_private_key_path_exists = False
+        private_key_path_exists = False
         if private_key_path is not None and os.path.exists(private_key_path):
             is_private_key_path_exists =True
         if not is_private_key_path_exists and private_key_string is None:
