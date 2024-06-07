@@ -308,6 +308,13 @@ open class GenerateTask @Inject constructor(private val objectFactory: ObjectFac
     val enumNameMappings = project.objects.mapProperty<String, String>()
 
     /**
+     * Specifies mappings between the operation id name and the new name
+     */
+    @Optional
+    @Input
+    val operationIdNameMappings = project.objects.mapProperty<String, String>()
+
+    /**
      * Specifies mappings (rules) in OpenAPI normalizer
      */
     @Optional
@@ -500,14 +507,6 @@ open class GenerateTask @Inject constructor(private val objectFactory: ObjectFac
     val generateApiDocumentation = project.objects.property<Boolean>()
 
     /**
-     * A special-case setting which configures some generators with XML support. In some cases,
-     * this forces json OR xml, so the default here is false.
-     */
-    @Optional
-    @Input
-    val withXml = project.objects.property<Boolean>()
-
-    /**
      * To write all log messages (not just errors) to STDOUT
      */
     @Optional
@@ -671,10 +670,6 @@ open class GenerateTask @Inject constructor(private val objectFactory: ObjectFac
 
             if (generateApiTests.isPresent) {
                 GlobalSettings.setProperty(CodegenConstants.API_TESTS, generateApiTests.get().toString())
-            }
-
-            if (withXml.isPresent) {
-                GlobalSettings.setProperty(CodegenConstants.WITH_XML, withXml.get().toString())
             }
 
             if (inputSpec.isPresent && remoteInputSpec.isPresent) {
@@ -872,9 +867,15 @@ open class GenerateTask @Inject constructor(private val objectFactory: ObjectFac
                 }
             }
 
+            if (operationIdNameMappings.isPresent) {
+                operationIdNameMappings.get().forEach { entry ->
+                    configurator.addOperationIdNameMapping(entry.key, entry.value)
+                }
+            }
+
             if (openapiNormalizer.isPresent) {
                 openapiNormalizer.get().forEach { entry ->
-                    configurator.addOpenAPINormalizer(entry.key, entry.value)
+                    configurator.addOpenapiNormalizer(entry.key, entry.value)
                 }
             }
 
@@ -904,7 +905,7 @@ open class GenerateTask @Inject constructor(private val objectFactory: ObjectFac
 
             if (openapiGeneratorIgnoreList.isPresent) {
                 openapiGeneratorIgnoreList.get().forEach {
-                    configurator.addOpenAPIGeneratorIgnoreList(it)
+                    configurator.addOpenapiGeneratorIgnoreList(it)
                 }
             }
 
