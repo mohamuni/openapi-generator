@@ -22,6 +22,16 @@ from {{packageName}}.exceptions import (
 none_type = type(None)
 file_type = io.IOBase
 
+model_init_errors = set()
+
+def set_model_init_error(error_message):
+    model_init_errors.add(error_message)
+
+def print_model_init_errors():
+    if len(model_init_errors) > 0:
+        for error in model_init_errors:
+            print(error)
+        model_init_errors.clear()
 
 def convert_js_args_to_python_args(fn):
     from functools import wraps
@@ -234,6 +244,8 @@ class OpenApiModel(object):
         else:
             new_inst = new_cls.__new__(new_cls, *args, **kwargs)
             new_inst.__init__(*args, **kwargs)
+        
+        print_model_init_errors()
 
         return new_inst
 
