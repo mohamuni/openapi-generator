@@ -20,7 +20,12 @@ type {{classname}} struct {
 {{#deprecated}}
 	// Deprecated
 {{/deprecated}}
-	{{name}} {{^required}}{{^isNullable}}{{^isArray}}{{^isFreeFormObject}}*{{/isFreeFormObject}}{{/isArray}}{{/isNullable}}{{/required}}{{{dataType}}} `json:"{{{baseName}}}{{^required}},omitempty{{/required}}"{{#withXml}} xml:"{{{baseName}}}{{#isXmlAttribute}},attr{{/isXmlAttribute}}"{{/withXml}}{{#withValidate}} validate:"{{validate}}"{{/withValidate}}{{#vendorExtensions.x-go-custom-tag}} {{{.}}}{{/vendorExtensions.x-go-custom-tag}}`
+{{#vendorExtensions.regex}}
+	{{name}} {{^required}}{{^isNullable}}{{^isArray}}{{^isFreeFormObject}}*{{/isFreeFormObject}}{{/isArray}}{{/isNullable}}{{/required}}{{{dataType}}} "json:\"{{{baseName}}}{{^required}},omitempty{{/required}}\"{{#withXml}} xml:\"{{{baseName}}}{{#isXmlAttribute}},attr{{/isXmlAttribute}}\"{{/withXml}} validate:\"{{{vendorExtensions.regex}}}\"{{#vendorExtensions.x-go-custom-tag}} {{{.}}}{{/vendorExtensions.x-go-custom-tag}}"
+{{/vendorExtensions.regex}}
+{{^vendorExtensions.regex}}
+	{{name}} {{^required}}{{^isNullable}}{{^isArray}}{{^isFreeFormObject}}*{{/isFreeFormObject}}{{/isArray}}{{/isNullable}}{{/required}}{{{dataType}}} `json:"{{{baseName}}}{{^required}},omitempty{{/required}}"{{#withXml}} xml:"{{{baseName}}}{{#isXmlAttribute}},attr{{/isXmlAttribute}}"{{/withXml}}{{#vendorExtensions.x-go-custom-tag}} {{{.}}}{{/vendorExtensions.x-go-custom-tag}}`
+{{/vendorExtensions.regex}}
 {{/vars}}
 {{#isAdditionalPropertiesTrue}}
 	AdditionalProperties map[string]interface{}
@@ -384,7 +389,12 @@ func (o *{{{classname}}}) UnmarshalJSON(data []byte) (err error) {
 	{{#deprecated}}
 		// Deprecated
 	{{/deprecated}}
+	{{#vendorExtensions.regex}}
+		{{name}} {{^required}}{{^isNullable}}{{^isArray}}{{^isFreeFormObject}}*{{/isFreeFormObject}}{{/isArray}}{{/isNullable}}{{/required}}{{{dataType}}} "json:\"{{{baseName}}}{{^required}},omitempty{{/required}}\"{{#withXml}} xml:\"{{{baseName}}}{{#isXmlAttribute}},attr{{/isXmlAttribute}}\"{{/withXml}} validate:\"{{{vendorExtensions.regex}}}\"{{#vendorExtensions.x-go-custom-tag}} {{{.}}}{{/vendorExtensions.x-go-custom-tag}}"
+	{{/vendorExtensions.regex}}
+	{{^vendorExtensions.regex}}
 		{{name}} {{^required}}{{^isNullable}}{{^isArray}}{{^isFreeFormObject}}*{{/isFreeFormObject}}{{/isArray}}{{/isNullable}}{{/required}}{{{dataType}}} `json:"{{{baseName}}}{{^required}},omitempty{{/required}}"{{#withXml}} xml:"{{{baseName}}}{{#isXmlAttribute}},attr{{/isXmlAttribute}}"{{/withXml}}{{#vendorExtensions.x-go-custom-tag}} {{{.}}}{{/vendorExtensions.x-go-custom-tag}}`
+	{{/vendorExtensions.regex}}
 	{{/vars}}
 	}
 

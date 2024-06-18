@@ -761,9 +761,8 @@ public abstract class AbstractGoCodegen extends DefaultCodegen implements Codege
                 }
 
                 if (cp.pattern != null) {
-                    cp.vendorExtensions.put("x-go-custom-tag", "validate:\"regexp=" +
-                        cp.pattern.replace("\\","\\\\").replaceAll("^/|/$","") +
-                        "\"");
+                    cp.vendorExtensions.put("regex", "regexp=" +
+                        cp.pattern.replace("\\","\\\\").replaceAll("^/|/$",""));
                 }
             }
             if (this instanceof GoClientCodegen && model.isEnum) {
