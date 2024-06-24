@@ -493,7 +493,7 @@ public abstract class AbstractGoCodegen extends DefaultCodegen implements Codege
             // http method verb conversion (e.g. PUT => Put)
             operation.httpMethod = camelize(operation.httpMethod.toLowerCase(Locale.ROOT));
         }
-
+        HashMap<String, CodegenModel> unifiedModelMap = ModelMap.toCodegenModelMap(allModels);
         // remove model imports to avoid error
         List<Map<String, String>> imports = objs.getImports();
         if (imports == null)
@@ -540,6 +540,11 @@ public abstract class AbstractGoCodegen extends DefaultCodegen implements Codege
                 if (!addedReflectImport && param.isCollectionFormatMulti) {
                     imports.add(createMapping("import", "reflect"));
                     addedReflectImport = true;
+                }
+
+                CodegenModel model = unifiedModelMap.get(param.baseName);
+                if(model != null && model.hasPattern){
+                    param.hasPattern = true;
                 }
 
                 // set x-exportParamName
@@ -761,17 +766,18 @@ public abstract class AbstractGoCodegen extends DefaultCodegen implements Codege
                 }
 
                 if (cp.pattern != null) {
-                    cp.vendorExtensions.put("regex", "regexp=" +
-                        cp.pattern.replace("\\","\\\\").replace("\"","\\\"").replaceAll("^/|/$",""));
+                    addedValidator = true;
+                    model.hasPattern = true;
+                    cp.vendorExtensions.put("regex", cp.pattern.replace("\\/","/").replaceAll("^/|/$",""));
                 }
             }
             if (this instanceof GoClientCodegen && model.isEnum) {
                 imports.add(createMapping("import", "fmt"));
             }
 
-            if(model.oneOf != null && !model.oneOf.isEmpty() && !addedValidator && generateUnmarshalJSON) {
-                imports.add(createMapping("import", "gopkg.in/validator.v2"));
-                addedValidator = true;
+            if(addedValidator){
+                imports.add(createMapping("import", "regexp"));
+                imports.add(createMapping("import", "github.com/go-playground/validator/v10"));
             }
 
             // if oneOf contains "null" type

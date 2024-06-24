@@ -63,6 +63,7 @@ public class CodegenParameter implements IJsonSchemaValidationProperties {
     public List<CodegenProperty> requiredVars = new ArrayList<CodegenProperty>();
     public CodegenProperty mostInnerItems;
     public Map<String, Object> vendorExtensions = new HashMap<String, Object>();
+    public boolean hasPattern;
     public boolean hasValidation;
     public boolean isNullable;
     public boolean isDeprecated;
@@ -241,6 +242,7 @@ public class CodegenParameter implements IJsonSchemaValidationProperties {
         if (this.ref != null) {
             output.setRef(this.ref);
         }
+        output.hasPattern = this.hasPattern;
         output.hasValidation = this.hasValidation;
         output.isNullable = this.isNullable;
         output.isDeprecated = this.isDeprecated;
@@ -288,7 +290,7 @@ public class CodegenParameter implements IJsonSchemaValidationProperties {
                 jsonSchema, isString, isNumeric, isInteger, isLong, isNumber, isFloat, isDouble, isDecimal,
                 isByteArray, isBinary, isBoolean, isDate, isDateTime, isUuid, isUri, isEmail, isPassword,
                 isFreeFormObject, isAnyType, isArray, isMap, isOptional, isFile, isEnum, isEnumRef, _enum, allowableValues,
-                items, mostInnerItems, additionalProperties, vars, requiredVars, vendorExtensions, hasValidation,
+                items, mostInnerItems, additionalProperties, vars, requiredVars, vendorExtensions, hasPattern, hasValidation,
                 getMaxProperties(), getMinProperties(), isNullable, isDeprecated, required, getMaximum(),
                 getExclusiveMaximum(), getMinimum(), getExclusiveMinimum(), getMaxLength(), getMinLength(),
                 getPattern(), getMaxItems(), getMinItems(), getUniqueItems(), contentType, multipleOf, isNull,isVoid,
@@ -341,6 +343,7 @@ public class CodegenParameter implements IJsonSchemaValidationProperties {
                 isFile == that.isFile &&
                 isEnum == that.isEnum &&
                 isEnumRef == that.isEnumRef &&
+                hasPattern == that.hasPattern &&
                 hasValidation == that.hasValidation &&
                 isNullable == that.isNullable &&
                 isDeprecated == that.isDeprecated &&
@@ -483,6 +486,7 @@ public class CodegenParameter implements IJsonSchemaValidationProperties {
         sb.append(", vars=").append(vars);
         sb.append(", requiredVars=").append(requiredVars);
         sb.append(", vendorExtensions=").append(vendorExtensions);
+        sb.append(", hasPattern=").append(hasPattern);
         sb.append(", hasValidation=").append(hasValidation);
         sb.append(", maxProperties=").append(maxProperties);
         sb.append(", minProperties=").append(minProperties);

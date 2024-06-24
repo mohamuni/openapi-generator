@@ -165,6 +165,10 @@ public class CodegenModel implements IJsonSchemaValidationProperties {
      */
     public boolean hasRequired;
     /**
+     * Indicates the type has at least one required property.
+     */
+    public boolean hasPattern;
+    /**
      * Indicates the type has at least one optional property.
      */
     public boolean hasOptional;
@@ -885,6 +889,7 @@ public class CodegenModel implements IJsonSchemaValidationProperties {
                 isEnum == that.isEnum &&
                 isNullable == that.isNullable &&
                 hasRequired == that.hasRequired &&
+                hasPattern == that.hasPattern &&
                 hasOptional == that.hasOptional &&
                 isArray == that.isArray &&
                 hasChildren == that.hasChildren &&
@@ -982,7 +987,7 @@ public class CodegenModel implements IJsonSchemaValidationProperties {
                 isDate, isDateTime, isNull, hasValidation, isShort, isUnboundedInteger, isBoolean,
                 getVars(), getAllVars(), getNonNullableVars(), getRequiredVars(), getOptionalVars(), getReadOnlyVars(), getReadWriteVars(),
                 getParentVars(), getAllowableValues(), getMandatory(), getAllMandatory(), getImports(), hasVars,
-                isEmptyVars(), hasMoreModels, hasEnums, isEnum, isNullable, hasRequired, hasOptional, isArray,
+                isEmptyVars(), hasMoreModels, hasEnums, isEnum, isNullable, hasRequired, hasPattern, hasOptional, isArray,
                 hasChildren, isMap, isOptional, isDeprecated, hasReadOnly, hasOnlyReadOnly, getExternalDocumentation(), getVendorExtensions(),
                 getAdditionalPropertiesType(), getMaxProperties(), getMinProperties(), getUniqueItems(), getMaxItems(),
                 getMinItems(), getMaxLength(), getMinLength(), getExclusiveMinimum(), getExclusiveMaximum(), getMinimum(),
@@ -1054,6 +1059,7 @@ public class CodegenModel implements IJsonSchemaValidationProperties {
         sb.append(", isEnum=").append(isEnum);
         sb.append(", isNullable=").append(isNullable);
         sb.append(", hasRequired=").append(hasRequired);
+        sb.append(", hasPattern=").append(hasPattern);
         sb.append(", hasOptional=").append(hasOptional);
         sb.append(", isArray=").append(isArray);
         sb.append(", hasChildren=").append(hasChildren);

@@ -118,6 +118,15 @@ func (a *{{{classname}}}Service) {{nickname}}Execute(r {{#structPrefix}}{{&class
 		{{/returnType}}
 	)
 
+	{{#allParams}}
+	{{#hasPattern}}
+	err := r.{{paramName}}.ValidateStruct()
+	if err != nil {
+		return {{#returnType}}localVarReturnValue, {{/returnType}}nil, &GenericOpenAPIError{error: err.Error()}
+	}
+	{{/hasPattern}}
+	{{/allParams}}
+
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "{{{classname}}}Service.{{{nickname}}}")
 	if err != nil {
 		return {{#returnType}}localVarReturnValue, {{/returnType}}nil, &GenericOpenAPIError{error: err.Error()}
