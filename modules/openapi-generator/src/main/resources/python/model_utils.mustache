@@ -1670,6 +1670,11 @@ def get_discarded_args(self, composed_instances, model_args):
             except Exception:
                 # allOf integer schema will throw exception
                 pass
+    # Check if args exist in its attribute map of self and remove the key from discarded_args
+    keys = self.attribute_map.keys()
+    for key in keys:
+        if key in discarded_args:
+            discarded_args.remove(key)
     return discarded_args
 
 
