@@ -780,18 +780,20 @@ public abstract class AbstractGoCodegen extends DefaultCodegen implements Codege
                 }
 
                 if (cp.pattern != null) {
-                    cp.vendorExtensions.put("x-go-custom-tag", "validate:\"regexp=" +
-                            cp.pattern.replace("\\", "\\\\").replaceAll("^/|/$", "") +
-                            "\"");
+                    model.hasPattern = true;
+                    addedValidator = true;
+                    cp.vendorExtensions.put("regex", cp.pattern.replace("\\/","/").replaceAll("^/|/$",""));
                 }
             }
             if (this instanceof GoClientCodegen && model.isEnum) {
                 imports.add(createMapping("import", "fmt"));
             }
 
-            if (model.oneOf != null && !model.oneOf.isEmpty() && !addedValidator && generateUnmarshalJSON) {
-                imports.add(createMapping("import", "gopkg.in/validator.v2"));
-                addedValidator = true;
+            if(model.oneOf != null){
+                imports.add(createMapping("import", "github.com/go-playground/validator/v10"));
+                if(addedValidator){
+                    imports.add(createMapping("import", "regexp"));
+                }
             }
 
             // if oneOf contains "null" type

@@ -20,7 +20,7 @@ type {{classname}} struct {
 {{#deprecated}}
 	// Deprecated
 {{/deprecated}}
-	{{name}} {{^required}}{{^isNullable}}{{^isArray}}{{^isFreeFormObject}}*{{/isFreeFormObject}}{{/isArray}}{{/isNullable}}{{/required}}{{{dataType}}} `json:"{{{baseName}}}{{^required}},omitempty{{/required}}"{{#withXml}} xml:"{{{baseName}}}{{#isXmlAttribute}},attr{{/isXmlAttribute}}"{{/withXml}}{{#withValidate}} validate:"{{validate}}"{{/withValidate}}{{#vendorExtensions.x-go-custom-tag}} {{{.}}}{{/vendorExtensions.x-go-custom-tag}}`
+	{{name}} {{^required}}{{^isNullable}}{{^isArray}}{{^isFreeFormObject}}*{{/isFreeFormObject}}{{/isArray}}{{/isNullable}}{{/required}}{{{dataType}}} `json:"{{{baseName}}}{{^required}},omitempty{{/required}}"{{#withXml}} xml:"{{{baseName}}}{{#isXmlAttribute}},attr{{/isXmlAttribute}}"{{/withXml}}{{#vendorExtensions.regex}} validate:"{{^required}}omitempty,{{/required}}{{classname}}{{name}}"{{/vendorExtensions.regex}} {{#vendorExtensions.x-go-custom-tag}}{{{.}}}{{/vendorExtensions.x-go-custom-tag}}`
 {{/vars}}
 {{#isAdditionalPropertiesTrue}}
 	AdditionalProperties map[string]interface{}
@@ -91,7 +91,29 @@ func New{{classname}}WithDefaults() *{{classname}} {
 {{/vars}}
 	return &this
 }
+{{#hasPattern}}
+// Validate function for the struct {{classname}}
+func (o *{{classname}}) ValidateStruct() error{
+	validate := validator.New()
+	{{#vars}}
+	{{#vendorExtensions.regex}}
+		validate.RegisterValidation("{{classname}}{{name}}",validate{{classname}}{{name}}Pattern)
+	{{/vendorExtensions.regex}}
+	{{/vars}}
+	return validate.Struct(o)
+}
+{{/hasPattern}}
 
+{{#vars}}
+{{#vendorExtensions.regex}}
+func validate{{classname}}{{name}}Pattern({{name}}Field validator.FieldLevel) bool{
+	regex := "{{{vendorExtensions.regex}}}"
+	re := regexp.MustCompile(regex)
+	{{name}} := {{name}}Field.Field().String()
+	return re.MatchString({{name}})
+}
+{{/vendorExtensions.regex}}
+{{/vars}}
 {{#vars}}
 {{#required}}
 // Get{{name}} returns the {{name}} field value
@@ -384,7 +406,7 @@ func (o *{{{classname}}}) UnmarshalJSON(data []byte) (err error) {
 	{{#deprecated}}
 		// Deprecated
 	{{/deprecated}}
-		{{name}} {{^required}}{{^isNullable}}{{^isArray}}{{^isFreeFormObject}}*{{/isFreeFormObject}}{{/isArray}}{{/isNullable}}{{/required}}{{{dataType}}} `json:"{{{baseName}}}{{^required}},omitempty{{/required}}"{{#withXml}} xml:"{{{baseName}}}{{#isXmlAttribute}},attr{{/isXmlAttribute}}"{{/withXml}}{{#vendorExtensions.x-go-custom-tag}} {{{.}}}{{/vendorExtensions.x-go-custom-tag}}`
+		{{name}} {{^required}}{{^isNullable}}{{^isArray}}{{^isFreeFormObject}}*{{/isFreeFormObject}}{{/isArray}}{{/isNullable}}{{/required}}{{{dataType}}} `json:"{{{baseName}}}{{^required}},omitempty{{/required}}"{{#withXml}} xml:"{{{baseName}}}{{#isXmlAttribute}},attr{{/isXmlAttribute}}"{{/withXml}}{{#vendorExtensions.regex}} validate:"{{^required}}omitempty,{{/required}}{{classname}}{{name}}"{{/vendorExtensions.regex}} {{#vendorExtensions.x-go-custom-tag}}{{{.}}}{{/vendorExtensions.x-go-custom-tag}}`
 	{{/vars}}
 	}
 

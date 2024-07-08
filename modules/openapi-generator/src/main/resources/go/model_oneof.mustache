@@ -93,7 +93,8 @@ func (dst *{{classname}}) UnmarshalJSON(data []byte) error {
 		if string(json{{#lambda.type-to-name}}{{{.}}}{{/lambda.type-to-name}}) == "{}" { // empty struct
 			dst.{{#lambda.type-to-name}}{{{.}}}{{/lambda.type-to-name}} = nil
 		} else {
-			if err = validator.Validate(dst.{{#lambda.type-to-name}}{{{.}}}{{/lambda.type-to-name}}); err != nil {
+
+			if err = dst.{{#lambda.type-to-name}}{{{.}}}{{/lambda.type-to-name}}.ValidateStruct(); err != nil {
 				dst.{{#lambda.type-to-name}}{{{.}}}{{/lambda.type-to-name}} = nil
 			} else {
 				match++
