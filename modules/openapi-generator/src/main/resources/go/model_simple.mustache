@@ -20,7 +20,7 @@ type {{classname}} struct {
 {{#deprecated}}
 	// Deprecated
 {{/deprecated}}
-	{{name}} {{^required}}{{^isNullable}}{{^isArray}}{{^isFreeFormObject}}*{{/isFreeFormObject}}{{/isArray}}{{/isNullable}}{{/required}}{{{dataType}}} `json:"{{{baseName}}}{{^required}},omitempty{{/required}}"{{#withXml}} xml:"{{{baseName}}}{{#isXmlAttribute}},attr{{/isXmlAttribute}}"{{/withXml}}{{#withValidate}} validate:"{{validate}}"{{/withValidate}}{{#vendorExtensions.x-go-custom-tag}} {{{.}}}{{/vendorExtensions.x-go-custom-tag}}`
+	{{name}} {{^required}}{{^isNullable}}{{^isArray}}{{^isFreeFormObject}}*{{/isFreeFormObject}}{{/isArray}}{{/isNullable}}{{/required}}{{{dataType}}} `json:"{{{baseName}}}{{^required}},omitempty{{/required}}"{{#withXml}} xml:"{{{baseName}}}{{#isXmlAttribute}},attr{{/isXmlAttribute}}"{{/withXml}}{{#vendorExtensions.x-go-custom-tag}}{{{.}}}{{/vendorExtensions.x-go-custom-tag}}`
 {{/vars}}
 {{#isAdditionalPropertiesTrue}}
 	AdditionalProperties map[string]interface{}
@@ -91,6 +91,50 @@ func New{{classname}}WithDefaults() *{{classname}} {
 {{/vars}}
 	return &this
 }
+
+// Validate function for the struct {{classname}}
+func (o {{classname}}) Validate() error{
+	return validation.ValidateStruct(&o,
+		{{#parentModel.name}}
+		{{^isArray}}
+		validation.Field(&o.{{{parentModel.classname}}}),
+		{{/isArray}}
+		{{#isArray}}
+		Items validation.Field(&o.{{{parentModel.classname}}}),
+		{{/isArray}}
+		{{/parentModel.name}}
+		{{#vars}}
+		{{#vendorExtensions.regex}}
+		validation.Field(&o.{{name}}, validation.Match(regexp.MustCompile("{{{vendorExtensions.regex}}}"))),
+		{{/vendorExtensions.regex}}
+		{{#isModel}}
+		validation.Field(&o.{{name}}),
+		{{/isModel}}
+		{{#isArray}}
+		// primitive {{isPrimitiveType}}
+		{{^isPrimitiveType}}
+		{{#vendorExtensions.x-golang-atomic-type}}
+		validation.Field(&o.{{name}}, validation.Each(validation.By(validate{{classname}}{{name}}))),
+		{{/vendorExtensions.x-golang-atomic-type}}
+		{{/isPrimitiveType}}
+		{{/isArray}}
+		{{/vars}}
+	)
+}
+
+{{#vars}}
+{{#isArray}}
+{{^isPrimitiveType}}
+{{#vendorExtensions.x-golang-atomic-type}}
+func validate{{classname}}{{name}}(value interface{}) error {
+    val, _ := value.({{vendorExtensions.x-golang-atomic-type}})
+    return val.Validate()
+}
+{{/vendorExtensions.x-golang-atomic-type}}
+{{/isPrimitiveType}}
+{{/isArray}}
+{{/vars}}
+
 
 {{#vars}}
 {{#required}}

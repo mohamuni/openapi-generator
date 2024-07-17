@@ -3,6 +3,12 @@ type Nullable{{{classname}}} struct {
 	isSet bool
 }
 
+func (v Nullable{{classname}}) Validate() error{
+	return validation.ValidateStruct(&v,
+		validation.Field(&v.value),
+	)
+}
+
 func (v Nullable{{classname}}) Get() {{^isArray}}{{^isFreeFormObject}}*{{/isFreeFormObject}}{{/isArray}}{{classname}} {
 	return v.value
 }

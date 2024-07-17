@@ -317,6 +317,10 @@ func (a *{{{classname}}}Service) {{nickname}}Execute(r {{#structPrefix}}{{&class
 {{/formParams}}
 {{#bodyParams}}
 	// body params
+	err = r.{{paramName}}.Validate()
+	if err != nil{
+		return localVarReturnValue, nil, err
+	}
 	localVarPostBody = r.{{paramName}}
 {{/bodyParams}}
 {{#authMethods}}

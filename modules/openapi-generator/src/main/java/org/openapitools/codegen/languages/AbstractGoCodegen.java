@@ -726,6 +726,11 @@ public abstract class AbstractGoCodegen extends DefaultCodegen implements Codege
                 || (property.isAnyType && !property.isModel)) {
             property.vendorExtensions.put("x-golang-is-container", true);
         }
+        if(property.containerType=="array"){
+            if(!languageSpecificPrimitives.contains(property.dataType.replace("[]",""))){
+                property.vendorExtensions.put("x-golang-atomic-type", property.dataType.replace("[]",""));
+            }
+        }
     }
 
     @Override
@@ -780,18 +785,17 @@ public abstract class AbstractGoCodegen extends DefaultCodegen implements Codege
                 }
 
                 if (cp.pattern != null) {
-                    cp.vendorExtensions.put("x-go-custom-tag", "validate:\"regexp=" +
-                            cp.pattern.replace("\\", "\\\\").replaceAll("^/|/$", "") +
-                            "\"");
+                    model.hasPattern = true;
+                    addedValidator = true;
+                    cp.vendorExtensions.put("regex", cp.pattern.replace("\\/","/").replaceAll("^/|/$",""));
                 }
             }
             if (this instanceof GoClientCodegen && model.isEnum) {
                 imports.add(createMapping("import", "fmt"));
             }
-
-            if (model.oneOf != null && !model.oneOf.isEmpty() && !addedValidator && generateUnmarshalJSON) {
-                imports.add(createMapping("import", "gopkg.in/validator.v2"));
-                addedValidator = true;
+            imports.add(createMapping("import", "github.com/go-ozzo/ozzo-validation/v4"));
+            if(addedValidator){
+                imports.add(createMapping("import", "regexp"));
             }
 
             // if oneOf contains "null" type
