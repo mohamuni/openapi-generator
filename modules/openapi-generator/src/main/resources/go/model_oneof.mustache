@@ -15,7 +15,7 @@ func {{#lambda.type-to-name}}{{{.}}}{{/lambda.type-to-name}}As{{classname}}(v *{
 
 {{/oneOf}}
 
-func (dst {{classname}}) Validate() error{
+func (dst {{classname}}) Validate() error {
 	return validation.ValidateStruct(&dst,
 		{{#oneOf}}
 		validation.Field(&dst.{{#lambda.type-to-name}}{{{.}}}{{/lambda.type-to-name}}),

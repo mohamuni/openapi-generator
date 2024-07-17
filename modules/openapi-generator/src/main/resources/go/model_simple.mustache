@@ -93,7 +93,7 @@ func New{{classname}}WithDefaults() *{{classname}} {
 }
 
 // Validate function for the struct {{classname}}
-func (o {{classname}}) Validate() error{
+func (o {{classname}}) Validate() error {
 	return validation.ValidateStruct(&o,
 		{{#parentModel.name}}
 		{{^isArray}}

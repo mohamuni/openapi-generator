@@ -3,7 +3,7 @@ type Nullable{{{classname}}} struct {
 	isSet bool
 }
 
-func (v Nullable{{classname}}) Validate() error{
+func (v Nullable{{classname}}) Validate() error {
 	return validation.ValidateStruct(&v,
 		validation.Field(&v.value),
 	)
