@@ -785,7 +785,6 @@ public abstract class AbstractGoCodegen extends DefaultCodegen implements Codege
                 }
 
                 if (cp.pattern != null) {
-                    model.hasPattern = true;
                     addedValidator = true;
                     cp.vendorExtensions.put("regex", cp.pattern.replace("\\/","/").replaceAll("^/|/$",""));
                 }
