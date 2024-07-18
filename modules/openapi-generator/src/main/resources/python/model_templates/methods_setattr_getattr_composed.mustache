@@ -34,12 +34,9 @@
                     [e for e in [self._path_to_item, name] if e]
                 )
         # attribute must be set on self and composed instances
-        model_instances = self._var_name_to_model_instances.get(name, self._additional_properties_model_instances)
-        for model_instance in model_instances:
-            if model_instance == self:
-                self.set_attribute(name, value)
-            else:
-                setattr(model_instance, name, value)
+        self.set_attribute(name, value)
+        for model_instance in self._composed_instances:
+            setattr(model_instance, name, value)
         if name not in self._var_name_to_model_instances:
             # we assigned an additional property
             self.__dict__['_var_name_to_model_instances'][name] = self._composed_instances + [self]

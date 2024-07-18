@@ -1371,9 +1371,10 @@ def model_to_dict(model_instance, serialize=True):
             item[1], serialize=serialize)) if hasattr(
         item[1], '_data_store') else item
 
-    model_instances = [model_instance]
+    model_instances = []
     if model_instance._composed_schemas:
         model_instances.extend(model_instance._composed_instances)
+    model_instances.append(model_instance)
     seen_json_attribute_names = set()
     used_fallback_python_attribute_names = set()
     py_to_json_map = {}
@@ -1490,14 +1491,10 @@ def get_allof_instances(self, model_args, constant_args):
     """
     composed_instances = []
     for allof_class in self._composed_schemas['allOf']:
-        allof_model_args = {}
-        var_names = set(allof_class.openapi_types.keys())
-        for var_name in var_names:
-            if var_name in model_args:
-                allof_model_args[var_name] = model_args[var_name]
         try:
             if constant_args.get('_spec_property_naming'):
-                allof_instance = allof_class._from_openapi_data(**allof_model_args, **constant_args)
+                model_data = dict(**model_args, **constant_args)
+                allof_instance = allof_class._new_from_openapi_data(**model_data)
             else:
                 allof_instance = allof_class(**model_args, **constant_args)
             composed_instances.append(allof_instance)
@@ -1670,11 +1667,6 @@ def get_discarded_args(self, composed_instances, model_args):
             except Exception:
                 # allOf integer schema will throw exception
                 pass
-    # Check if args exist in its attribute map of self and remove the key from discarded_args
-    keys = self.attribute_map.keys()
-    for key in keys:
-        if key in discarded_args:
-            discarded_args.remove(key)
     return discarded_args
 
 
