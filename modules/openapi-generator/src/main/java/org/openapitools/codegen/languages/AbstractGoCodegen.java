@@ -40,15 +40,26 @@ public abstract class AbstractGoCodegen extends DefaultCodegen implements Codege
     private final Logger LOGGER = LoggerFactory.getLogger(AbstractGoCodegen.class);
     private static final String NUMERIC_ENUM_PREFIX = "_";
 
-    @Setter protected boolean withGoCodegenComment = false;
-    @Setter protected boolean withAWSV4Signature = false;
-    @Setter protected boolean withXml = false;
-    @Setter protected boolean enumClassPrefix = false;
-    @Setter protected boolean structPrefix = false;
-    @Setter protected boolean generateInterfaces = false;
-    @Setter protected boolean withGoMod = false;
-    @Setter protected boolean generateMarshalJSON = true;
-    @Setter protected boolean generateUnmarshalJSON = true;
+    @Setter
+    protected boolean withGoCodegenComment = false;
+    @Setter
+    protected boolean withAWSV4Signature = false;
+    @Setter
+    protected boolean withXml = false;
+    @Setter
+    protected boolean enumClassPrefix = false;
+    @Setter
+    protected boolean structPrefix = false;
+    @Setter
+    protected boolean generateInterfaces = false;
+    @Setter
+    protected boolean withGoMod = false;
+    @Setter
+    protected boolean generateMarshalJSON = true;
+    @Setter
+    protected boolean generateUnmarshalJSON = true;
+    @Setter
+    protected boolean useDefaultValuesForRequiredVars = false;
 
     @Setter protected String packageName = "openapi";
     protected Set<String> numberTypes;
