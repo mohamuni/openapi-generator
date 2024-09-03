@@ -32,7 +32,7 @@
 {{#requiredVars}}
 {{^isReadOnly}}
 {{#defaultValue}}
-        {{name}} = kwargs.get('{{name}}', {{{defaultValue}}})
+        {{name}} = {{{defaultValue}}} if len(kwargs.get('{{name}}','').strip()) == 0 else kwargs.get('{{name}}', {{{defaultValue}}})
 {{/defaultValue}}
 {{/isReadOnly}}
 {{/requiredVars}}
