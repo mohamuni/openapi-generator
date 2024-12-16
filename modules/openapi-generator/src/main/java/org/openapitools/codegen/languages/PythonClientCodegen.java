@@ -161,6 +161,7 @@ public class PythonClientCodegen extends PythonLegacyClientCodegen {
         List<CodegenSecurity> authMethods = fromSecurity(securitySchemeMap);
         if (ProcessUtils.hasHttpSignatureMethods(authMethods)) {
             supportingFiles.add(new SupportingFile("signing.mustache", packagePath(), "signing.py"));
+            supportingFiles.add(new SupportingFile("authentication.mustache", packagePath(), "authentication.py"));
         }
 
         Boolean generateSourceCodeOnly = false;

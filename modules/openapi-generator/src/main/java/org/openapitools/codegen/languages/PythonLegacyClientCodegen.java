@@ -37,6 +37,7 @@ public class PythonLegacyClientCodegen extends AbstractPythonCodegen implements 
     public static final String USE_NOSE = "useNose";
     public static final String RECURSION_LIMIT = "recursionLimit";
     public static final String PYTHON_ATTR_NONE_IF_UNSET = "pythonAttrNoneIfUnset";
+    public static final String HOST_NAME = "hostName";
 
     protected String packageUrl;
     protected String apiDocPath = "docs/";
@@ -137,6 +138,7 @@ public class PythonLegacyClientCodegen extends AbstractPythonCodegen implements 
         cliOptions.add(CliOption.newBoolean(USE_NOSE, "use the nose test framework").
                 defaultValue(Boolean.FALSE.toString()));
         cliOptions.add(new CliOption(RECURSION_LIMIT, "Set the recursion limit. If not set, use the system default value."));
+        cliOptions.add(new CliOption(HOST_NAME, "Set hostname from config file if provided"));
 
         supportedLibraries.put("urllib3", "urllib3-based client");
         supportedLibraries.put("asyncio", "Asyncio-based client (python 3.5+)");
@@ -174,9 +176,14 @@ public class PythonLegacyClientCodegen extends AbstractPythonCodegen implements 
             setPackageVersion((String) additionalProperties.get(CodegenConstants.PACKAGE_VERSION));
         }
 
+        if (additionalProperties.containsKey(CodegenConstants.HOST_NAME)) {
+            setHostName((String) additionalProperties.get(CodegenConstants.HOST_NAME));
+        }
+
         additionalProperties.put(CodegenConstants.PROJECT_NAME, projectName);
         additionalProperties.put(CodegenConstants.PACKAGE_NAME, packageName);
         additionalProperties.put(CodegenConstants.PACKAGE_VERSION, packageVersion);
+        additionalProperties.put(CodegenConstants.HOST_NAME, hostName);
 
         if (additionalProperties.containsKey(CodegenConstants.EXCLUDE_TESTS)) {
             excludeTests = Boolean.valueOf(additionalProperties.get(CodegenConstants.EXCLUDE_TESTS).toString());

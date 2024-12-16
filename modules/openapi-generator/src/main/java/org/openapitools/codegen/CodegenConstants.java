@@ -401,4 +401,5 @@ public class CodegenConstants {
 
     public static final String ERROR_OBJECT_TYPE = "errorObjectType";
 
+    public static final String HOST_NAME = "hostName";
 }

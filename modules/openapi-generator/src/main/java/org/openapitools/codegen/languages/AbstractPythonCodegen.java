@@ -44,6 +44,7 @@ public abstract class AbstractPythonCodegen extends DefaultCodegen implements Co
     protected String packageName = "openapi_client";
     protected String packageVersion = "1.0.0";
     protected String projectName; // for setup.py, e.g. petstore-api
+    protected String hostName;
 
     public AbstractPythonCodegen() {
         super();
@@ -610,6 +611,10 @@ public abstract class AbstractPythonCodegen extends DefaultCodegen implements Co
 
     public void setProjectName(String projectName) {
         this.projectName = projectName;
+    }
+
+    public void setHostName(String hostName) {
+        this.hostName = hostName;
     }
 
     public void setPackageVersion(String packageVersion) {
