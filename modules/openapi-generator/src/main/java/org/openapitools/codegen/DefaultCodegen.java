@@ -3186,7 +3186,7 @@ public class DefaultCodegen implements CodegenConfig {
             return var.defaultValue;
         }
         List<?> valueList = (List<?>) values;
-        return valueList.stream().filter(o -> o.equals(modelName)).map(o -> (String) o).findAny().orElse(var.defaultValue);
+        return valueList.stream().filter(o -> (o == null ? "null" : o).equals(modelName)).map(o -> (String) o).findAny().orElse(var.defaultValue);
     }
 
     protected void SortModelPropertiesByRequiredFlag(CodegenModel model) {
